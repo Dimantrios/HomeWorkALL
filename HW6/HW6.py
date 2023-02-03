@@ -27,15 +27,9 @@ print(any([False, False]) == my_any([False, False]))
 # =========== zip ================================================================================
 
 def my_zip(*args):
-    min_el = args[0]
-    for i in args:
-        if i == []:
-            no_args = []
-            return no_args
-        elif int(len(i)) < int(len(min_el)):
-            min_el = i
+    min_len = min(map(len, args))
     res = []
-    for index in range(len(min_el)):
+    for index in range(min_len):
         tmp = []
         for coll in args:
             tmp.append(coll[index])
@@ -52,31 +46,28 @@ print(list(zip(range(10))) == my_zip(range(10)))
 # =========== map ================================================================================
 
 def my_map(func, *iterables):
-    for i in iterables:
-        res = []
-        if i == str(i):
-            r = list(i)
-            for i2 in r:
-                int_i2 = func(i2)
-                res.append(int_i2)
-            return res
-        else:
-            for r in iterables:
-                min_el = iterables[0]
-                if list(r) < list(min_el):
-                    min_el = r
-                continue
-    L = list(min_el)
-    return L
+    res = []
+    if len(iterables) == 1:
+        """ Тут можливо етеруватись по кожному елементу без другого for? Лише з одним for."""
+        for i in iterables:
+            for i2 in i:
+                res.append(func(i2))
+        return res
+    else:
+        range_list = []
+        for i in iterables:
+            range_list.append(list(i))
+        res = func(range_list)
+    return res
+
 print('\n', 'Task with map: ', '\n')
 print(list(map(int, '1234567890')) == my_map(int, '1234567890'))
 print(list(map(min, range(10), range(20, 30), range(25, 15, -1))) == my_map(min, range(10), range(20, 30), range(25, 15, -1)))
-
 # =========== filter =============================================================================
 
 def my_filter(func, *iterable):
     res = []
-    if func == None:
+    if func is None:
         for i in iterable:
             for i2 in i:
                 if not i2:
@@ -112,75 +103,59 @@ print(sum([]) == my_sum([]))
 
 # =========== enumerate =======================================================================
 
-def my_enumerate(iterables, *args):
+def my_enumerate(iterables, start=0):
+    e_set = set()
     res = []
-    res.append((*args, iterables[0]))
-    i = args
-    for a in iterables:
-        if a == iterables[0]:
-            continue
-        else:
-            if i == args:
-                i = args[0] + (1,)[0]
-                res.append((i, a))
-            else:
-                i = i + 1
-                res.append((i, a))
-                continue
+    for i in iterables:
+        if i not in e_set:
+            e_set.add(i)
+            res.append((start, i))
+            start += 1
     return res
+
 print('\n', 'Task with enumerate: ', '\n')
 print(list(enumerate('1234567890', 1)) == my_enumerate('1234567890', 1))
 
 # =========== Range =======================================================================
 
-def my_range(*args):
+def my_range(start, stop=None, step=None):
+    """
+     Не зрозумів як краще порівнювати Int та NoneType у цьому випадку ------------
+    """
     res = []
-    if len(args) == 1 and res == []:
-        args_values = []
-        args_values.append(*args)
-        res = [0]
-        values = 0
-        while values < args_values[0] - 1:
+    if step is None and stop is not None and start > stop:
+        return res
+    elif start >= 0 and stop is None and step is None:
+        values = -1
+        while values < start - 1:
             values += 1
             res.append(values)
-            continue
         return res
-    elif len(args) == 2:
-        unpac1, unpac2 = args
-        values = unpac1
+
+    elif step is None and start is not None and stop is not None and start < stop:
+        values = start
         res.append(values)
-        if unpac1 < unpac2:
-            while values < unpac2 - 1:
-                values += 1
-                res.append(values)
-                continue
-            return res
-        else:
-            res = []
-            return res
-    elif len(args) == 3 and args[2] > 0 and args[0] > args[1]:
-        res = []
+        while values < stop - 1:
+            values += 1
+            res.append(values)
         return res
-    elif len(args) == 3 and args[2] < 0:
-        unpac1, unpac2, unpac3 = args
-        values = unpac1
+    elif stop is not None and start < stop and step is not None and step > 0:
+        values = start
         res.append(values)
-        if unpac1 > unpac2:
-            while values > unpac2 + 1:
-                values += unpac3
-                res.append(values)
-                continue
-            return res
-    elif len(args) == 3 and args[2] > 0:
-        unpac1, unpac2, unpac3 = args
-        values = unpac1
+        while values < stop - 1:
+            values += step
+            res.append(values)
+        return res
+    elif stop is not None and start > stop and step is not None and step > 0:
+        return res
+    elif stop is not None and start > stop and step is not None and step < 0:
+        values = start
         res.append(values)
-        if unpac1 < unpac2:
-            while values < unpac2 - 1:
-                values += unpac3
-                res.append(values)
-                continue
-            return res
+        while values > stop + 1:
+            values += step
+            res.append(values)
+        return res
+
 print('\n', 'Task with range: ', '\n')
 print(list(range(10)) == my_range(10))
 print(list(range(10, 20)) == my_range(10, 20))
